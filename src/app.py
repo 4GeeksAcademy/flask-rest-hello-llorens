@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, People, Planets, User
 #from models import Person
 
 app = Flask(__name__)
@@ -36,14 +36,58 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/user', methods=['GET'])
+@app.route('/people', methods=['GET'])
 def handle_hello():
+    people_list = People.query.all()
+    people_JSON = [{'id': P.Id, 'Name': P.Name, 'Last_Name': P.Last_Name, 'Age': P.Age} for P in people_list]
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+    return jsonify(people_JSON), 200
 
-    return jsonify(response_body), 200
+
+@app.route('/people', methods=['POST'])
+def crear_usuario():
+    try:
+
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No se recibieron datos"}), 400
+
+        name = data.get('Name')
+        last_name = data.get('Last_Name')
+        age = data.get('Age')
+
+        if not name or not last_name or not isinstance(age, int):
+            return jsonify({"error": "Faltan datos o son inválidos"}), 400
+
+        new_person = People(Name=name, Last_Name=last_name, Age=age)
+
+        
+        db.session.add(new_person)
+        db.session.commit()
+
+        
+        return jsonify({
+            "message": "Usuario creado exitosamente",
+            "user": {
+                "id": new_person.Id,
+                "Name": new_person.Name,
+                "Last_Name": new_person.Last_Name,
+                "Age": new_person.Age
+            }
+        }), 201
+    except Exception as e:
+    
+        return jsonify({"error": f"Ocurrió un error: {str(e)}"}), 500
+
+
+
+@app.route('/planets', methods=['GET'])
+def obtener_planetas():
+    planet_list = Planets.query.all()
+    planet_JSON = [{'id': P.id, 'Name': P.Name, 'Population': P.Population, 'Width': P.Width, } for P in planet_list]
+
+    return jsonify(planet_JSON), 200
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':

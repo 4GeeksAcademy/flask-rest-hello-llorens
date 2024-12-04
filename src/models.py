@@ -17,3 +17,22 @@ class User(db.Model):
             "email": self.email,
             # do not serialize the password, its a security breach
         }
+
+    
+class People(db.Model):
+    Id = db.Column(db.Integer, primary_key = True)
+    Name = db.Column(db.String(50), nullable = False)
+    Last_Name = db.Column(db.String(50), nullable = False)
+    Age = db.Column(db.Integer, nullable = False)
+
+    def __repr__(self):
+        return f'<Name {self.Name}>'
+
+class Planets(db.Model):
+    Id = db.Column(db.Integer, primary_key = True)
+    Name = db.Column(db.String(50), nullable = False)
+    Population = db.Column(db.Integer, nullable = False)
+    Width = db.Column(db.Integer, nullable = False)
+
+    def __repr__(self):
+        return f'<Name {self.Name}>'
