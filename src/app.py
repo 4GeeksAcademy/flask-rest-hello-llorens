@@ -56,6 +56,28 @@ def get_person(people_id):
         'Age': person.Age
     }), 200
 
+@app.route('/people', methods=['POST'])
+def create_person():
+    data = request.get_json()
+    if not data or 'Name' not in data or 'Last_Name' not in data or 'Age' not in data:
+        return jsonify({"error": "Faltan datos para crear un personaje"}), 400
+    
+    new_person = People(Name=data['Name'], Last_Name=data['Last_Name'], Age=data['Age'])
+    db.session.add(new_person)
+    db.session.commit()
+    return jsonify({"message": "Personaje creado", "id": new_person.Id}), 201
+
+@app.route('/people/<int:people_id>', methods=['DELETE'])
+def delete_person(people_id):
+    person = People.query.get(people_id)
+    if not person:
+        return jsonify({"error": "Personaje no encontrado"}), 404
+    
+    db.session.delete(person)
+    db.session.commit()
+    return jsonify({"message": f"Personaje con id {people_id} eliminado exitosamente"}), 200
+
+
 
 @app.route('/planets', methods=['GET'])
 def get_planets():
@@ -75,6 +97,27 @@ def get_planet(planet_id):
         'Population': planet.Population,
         'Width': planet.Width
     }), 200
+
+@app.route('/planets', methods=['POST'])
+def create_planet():
+    data = request.get_json()
+    if not data or 'Name' not in data or 'Population' not in data or 'Width' not in data:
+        return jsonify({"error": "Faltan datos para crear un planeta"}), 400
+    
+    new_planet = Planets(Name=data['Name'], Population=data['Population'], Width=data['Width'])
+    db.session.add(new_planet)
+    db.session.commit()
+    return jsonify({"message": "Planeta creado", "id": new_planet.Id}), 201
+
+@app.route('/planets/<int:planet_id>', methods=['DELETE'])
+def delete_planet(planet_id):
+    planet = Planets.query.get(planet_id)
+    if not planet:
+        return jsonify({"error": "Planeta no encontrado"}), 404
+    
+    db.session.delete(planet)
+    db.session.commit()
+    return jsonify({"message": f"Planeta con id {planet_id} eliminado exitosamente"}), 200
 
 
 @app.route('/users', methods=['GET'])
@@ -109,7 +152,7 @@ def add_favorite_planet(planet_id):
 # [POST] /favorite/people/<int:people_id> - Añadir un personaje favorito
 @app.route('/favorite/people/<int:people_id>', methods=['POST'])
 def add_favorite_person(people_id):
-    user_id = 1  # Usuario fijo para este ejemplo
+    user_id = 1  
     person = People.query.get(people_id)
     if not person:
         return jsonify({"error": "Personaje no encontrado"}), 404
